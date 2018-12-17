@@ -10,7 +10,6 @@ server.get('/*', restify.plugins.serveStatic({
 }));
 
 // Middleware - CORS
- 
 server.use(
   function crossOrigin(req,res,next){
     res.header("Access-Control-Allow-Origin", "http://localhost:3000");
@@ -32,6 +31,9 @@ server.listen(config.PORT, () => {
 const db = mongoose.connection;
 db.on('error', (err) => console.log(err));
 db.once('open', () => {
+  require('./routes/terms')(server);
+  require('./routes/itunes')(server);
   require('./routes/customers')(server);
+  require('./routes/posts')(server);
   console.log(`server started on port ${config.PORT}`)
 })
