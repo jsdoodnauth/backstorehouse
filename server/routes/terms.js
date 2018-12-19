@@ -23,6 +23,24 @@ module.exports = server => {
     }        
   });
 
+    // GET - Next Term
+    server.get('/terms/next', async (req, res, next) => {
+      try {
+        const term = await Term.findOne({isNext: true, isActive: true});
+        if (!term) {
+          const updateTerms = await Term.find({isNext: false}).updateMany({$set: {isNext: true}});
+        } else {
+          term.counter += 1;
+          term.isNext = false;
+          term.save();  
+        }
+        res.send(term);
+        next();  
+      } catch(err) {
+        return next(new errors.ResourceNotFoundError(`There is no term found`));
+      }          
+    });
+
   // Add Term
   server.post('/terms', async (req, res, next) => {
     // Check for JSON
@@ -35,7 +53,10 @@ module.exports = server => {
         if (error) {
           const { name } = req.body;
           const term = new Term({
-            name
+            name,
+            counter: 0,
+            isNext: true,
+            isActive: true
           });
 
           try {
@@ -65,9 +86,12 @@ module.exports = server => {
     try {
       const term = await Term.findOneAndUpdate({_id: req.params.id }, req.body, { upsert: true }, async (error, result) => {
         if (error) {
-          const { name } = req.body;
+          const { name, isActive } = req.body;
           const term = new Term({
-            name
+            name,
+            counter: 0,
+            isNext: true,
+            isActive: true
           });
 
           try {
@@ -89,7 +113,7 @@ module.exports = server => {
   // DELETE - Term
   server.del('/terms/:id', async (req, res, next) => {
     try{
-      const term = await Term.findOneAndRemove({ name: req.body.name });
+      const term = await Term.findOneAndRemove({ _id: req.params.id });
       res.send(204);
       next();
     } catch(err) {

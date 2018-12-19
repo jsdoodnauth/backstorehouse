@@ -14,13 +14,13 @@ const AppSchema = new mongoose.Schema({
   },
   ipadScreenshotUrls: {
     type: String,
-    required: true,
-    trim: true
+    trim: true,
+    default: []
   },
   appletvScreenshotUrls: {
     type: String,
-    required: true,
-    trim: true
+    trim: true,
+    default: '[]'
   },
   artworkUrl60: {
     type: String,
@@ -49,8 +49,8 @@ const AppSchema = new mongoose.Schema({
   },
   advisories: {
     type: String,
-    required: true,
-    trim: true
+    trim: true,
+    default: []
   },
   kind: {
     type: String,
@@ -59,8 +59,8 @@ const AppSchema = new mongoose.Schema({
   },
   features: {
     type: String,
-    required: true,
-    trim: true
+    trim: true,
+    default: []
   },
   averageUserRatingForCurrentVersion: {
     type: Number,
