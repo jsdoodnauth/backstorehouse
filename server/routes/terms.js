@@ -24,49 +24,66 @@ module.exports = server => {
   });
 
     // GET - Next Term
-    server.get('/terms/next', async (req, res, next) => {
+    server.get('/terms/next', (req, res, next) => {
       try {
-        const term = await Term.findOne({isNext: true, isActive: true});
-        if (!term) {
-          const updateTerms = await Term.find({isNext: false}).updateMany({$set: {isNext: true}});
-        } else {
-          term.counter += 1;
-          term.isNext = false;
-          term.save();  
-        }
-        res.send(term);
-        next();  
+        const term = Term.findOne({isNext: true}, async (error, term) => {
+          if (error) {
+            console.log(`Error in terms: ${error}`);
+            next();
+          }
+          
+          if (!term) {
+            // const updateTerms = await Term.find({isNext: false}).updateMany({$set: {isNext: true}});
+            // const updateTermsCounter = await Term.find({counter: 0}).updateMany({$set: {isNext: true}});
+          } else {
+            term.counter += 1;
+            term.isNext = false;
+            term.save();  
+          }
+          res.send(term);
+          next();  
+        });
       } catch(err) {
         return next(new errors.ResourceNotFoundError(`There is no term found`));
       }          
     });
 
   // Add Term
-  server.post('/terms', async (req, res, next) => {
+  server.post('/terms', (req, res, next) => {
     // Check for JSON
     if(!req.is('application/json')) {
       return next(new errors.InvalidContentError("Expected 'application/json'"));
     }
 
     try {
-      const term = await Term.findOneAndUpdate({name: req.body.name }, req.body, { upsert: true }, async (error, result) => {
-        if (error) {
-          const { name } = req.body;
-          const term = new Term({
-            name,
-            counter: 0,
-            isNext: true,
-            isActive: true
-          });
-
-          try {
-            const newTerm = await term.save();
-            res.send(201);
-            next();
-          } catch(err) {
-            return next(new errors.InternalError(err.message));
-          }
+      const term = Term.find({name: req.body.name }, (error, result) => {
+        if (result.length) {
+          console.log('Term exists');
+          return next(); 
         }
+        
+        if (error) {
+          console.log('No Term Found... Creating new Term Object');
+          console.log(error);
+          return next();
+        }
+
+        const { name } = req.body;
+        const term = new Term({
+          name,
+          counter: 0,
+          isNext: true,
+          isActive: true
+        });
+
+        try {
+          const newTerm = term.save();
+          res.send(201);
+          next();
+        } catch(err) {
+          return next(new errors.InternalError(err.message));
+        }
+
       });
       res.send(200);
       next();

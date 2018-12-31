@@ -4,8 +4,9 @@ const schedule = require('node-schedule');
 const { getITunesTermLink } = require('../requests/itunes');
 const Term = require('../models/Terms');
 const App = require('../models/Apps');
+const AppSummary = require('../models/AppSummary');
 const testMode = false;
-const cronOn = false;
+const cronOn = true;
 
 const job = cronOn && schedule.scheduleJob('*/5 * * * * *', () => {
   console.log('CRON JOB: ' + new Date());
@@ -14,14 +15,27 @@ const job = cronOn && schedule.scheduleJob('*/5 * * * * *', () => {
 
 const getNextSearchTerm = async () => {
   try {
-    const term = Term.findOne({isNext: true, isActive: true}, (errors, item) => {
+    const term = Term.findOne({isNext: true}, (errors, item) => {
       let termName = '';
+      if (errors) {
+        console.log(`Error in terms: ${errors}`);
+        next();
+      }
+
       if (!item) {
-        const updateTerms = Term.updateMany({$set: {isNext: true}}, (errors, item) => {
-          if (errors) {
-            console.log('Error resetting terms');
-          }
-        });
+        if (testMode) {
+          const updateTerms = Term.updateMany({$set: {isNext: true}}, (errors, item) => {
+            if (errors) {
+              console.log('Error resetting terms');
+            }
+          });
+          const updateTermsCounter = Term.find({counter: 0}).updateMany({$set: {isNext: true, counter: 1}}, (errors, item) => {
+            if (errors) {
+              console.log('Error setting terms counter');
+            }
+          });
+        }
+        console.log('Next term reset');
         return false;
       }
       item.counter += 1;
@@ -47,7 +61,7 @@ const getDataFromAppStore = (url) => {
         {appList && appList.map(item => {
           try {
             const checkApp = App.findOneAndUpdate({trackId: item.trackId }, item, { upsert: true }, (error, result) => {
-              if (error) {  
+              if (error) {
                 const app = new App({
                   isGameCenterEnabled: item.isGameCenterEnabled,
                   screenshotUrls: item.screenshotUrls,
@@ -98,7 +112,7 @@ const getDataFromAppStore = (url) => {
                 if (!testMode) {
                   const newApp = app.save();
                 }
-                console.info('App stored: ' + app.trackName);
+                console.info('App added: ' + app.trackName);
               } else {
                 console.info('App updated: ' + item.trackName);
               }
@@ -106,6 +120,46 @@ const getDataFromAppStore = (url) => {
           } catch(err) {
             return new errors.InternalError(err.message);
           }
+
+          {appList && appList.map(item => {
+            try {
+              const checkApp = AppSummary.findOneAndUpdate({trackId: item.trackId }, item, { upsert: true }, (error, result) => {
+                if (error) {  
+                  const appSummary = new AppSummary({
+                    trackId: item.trackId,
+                    trackName: item.trackName,
+                    trackViewUrl: item.trackViewUrl,
+                    trackContentRating: item.trackContentRating,
+                    genres: item.genres,
+                    price: item.price,
+                    formattedPrice: item.formattedPrice,
+                    description: item.description,
+                    artworkUrl60: item.artworkUrl60,
+                    artworkUrl512: item.artworkUrl512,
+                    artworkUrl100: item.artworkUrl100,
+                    version: item.version,
+                    sellerName: item.sellerName,
+                    sellerUrl: item.sellerUrl,
+                    releaseDate: item.releaseDate,
+                    userRatingCount: item.userRatingCount,
+                    averageUserRating: item.averageUserRating,
+                    currentVersionReleaseDate: item.currentVersionReleaseDate,
+                    userRatingCountForCurrentVersion: item.userRatingCountForCurrentVersion,
+                    averageUserRatingForCurrentVersion: item.averageUserRatingForCurrentVersion
+                  });
+                  
+                  if (!testMode) {
+                    const newAppSummary = appSummary.save();
+                  }
+                  console.info('AppSummary added: ' + app.trackName);
+                } else {
+                  console.info('AppSummary updated: ' + item.trackName);
+                }
+              });  
+            } catch(err) {
+              return new errors.InternalError(err.message);
+            }
+          })}
         })}
       })
       .catch(error => {
@@ -118,6 +172,15 @@ module.exports = server => {
   server.get('/app', async (req, res, next) => {
     try {
       const appList = await App.find({});
+      res.send(appList);
+      next();  
+    } catch(err) {
+      return next(new errors.InvalidContentError(err));
+    } 
+  });
+  server.get('/appsummary', async (req, res, next) => {
+    try {
+      const appList = await AppSummary.find({});
       res.send(appList);
       next();  
     } catch(err) {

@@ -13,12 +13,10 @@ const TermSchema = new mongoose.Schema({
     default: 0
   },
   isNext: {
-    type: Boolean,
-    default: true
+    type: Boolean
   },
   isActive: {
-    type: Boolean,
-    default: true
+    type: Boolean
   }
 });
 

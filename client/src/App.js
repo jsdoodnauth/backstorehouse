@@ -1,12 +1,16 @@
 import React, { Component } from 'react';
 import './App.css';
-import HelloWorld from './components/helloworld';
+import AppList from './components/applist';
 
 class App extends Component {
   render() {
     return (
       <div className="App">
-      <HelloWorld />
+        <div className="container">
+          <div className="row">
+              <AppList />
+          </div>
+        </div>
       </div>
     );
   }
