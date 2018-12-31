@@ -58,14 +58,12 @@ module.exports = server => {
     try {
       const term = Term.find({name: req.body.name }, (error, result) => {
         if (result.length) {
-          console.log('Term exists');
+          res.send(200);
           return next(); 
         }
         
         if (error) {
-          console.log('No Term Found... Creating new Term Object');
-          console.log(error);
-          return next();
+          return next(new errors.InternalError(error.message));
         }
 
         const { name } = req.body;
@@ -103,21 +101,7 @@ module.exports = server => {
     try {
       const term = await Term.findOneAndUpdate({_id: req.params.id }, req.body, { upsert: true }, async (error, result) => {
         if (error) {
-          const { name, isActive } = req.body;
-          const term = new Term({
-            name,
-            counter: 0,
-            isNext: true,
-            isActive: true
-          });
-
-          try {
-            const newTerm = await term.save();
-            res.send(201);
-            next();
-          } catch(err) {
-            return next(new errors.InternalError(err.message));
-          }
+          return next(new errors.InternalError(error.message));
         }
       });
       res.send(200);
