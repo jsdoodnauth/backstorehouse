@@ -12,6 +12,7 @@ import Avatar from '@material-ui/core/Avatar';
 import StarRateIcon from '@material-ui/icons/StarRate';
 import PermIdentityIcon from '@material-ui/icons/PermIdentity';
 import Button from '@material-ui/core/Button';
+import Chip from '@material-ui/core/Chip';
 
 const styles = {
   root: {
@@ -40,7 +41,20 @@ const styles = {
   },
   contentContainer: {
     padding: 16
-  }
+  },
+  screenShotContainer: {
+    overflowX: "scroll",
+    overflowY: "hidden",
+  },
+  screenShotScrollContainer: {
+    display: "flex",
+    alignItems: "flex-end"
+  },
+  screenShot: {
+    flex: "0 0 25%",
+    width: "25%",
+    padding: "0.5rem"
+  } 
 };
 
 class AppDetails extends Component {
@@ -65,12 +79,12 @@ class AppDetails extends Component {
     const { appDetail } = this.state;
     if (appDetail) {
       if (appDetail.screenshotUrls) {}
-      const screenShotList = appDetail.screenshotUrls ? appDetail.screenshotUrls.split(',') : '[]';
+      const screenShotList = appDetail.screenshotUrls ? appDetail.screenshotUrls.split(',') : null;
       return(
-        <Grid container spacing={16} xs={12} >
+        <Grid container spacing={16} >
           <Paper className={classes.root} elevation={1}>
 
-          <Grid container xs={12} >
+          <Grid container>
             <Grid item xs={2} md={2} className={classes.contentContainer}>
             <Avatar alt={ appDetail.trackName } src={ appDetail.artworkUrl100 } className={classes.avatar} />
             </Grid>
@@ -78,10 +92,13 @@ class AppDetails extends Component {
               <Typography component="h3" variant="h4">
               { appDetail.trackName }
               </Typography>
-              <Typography variant="span" color="textSecondary">
-              { appDetail.sellerName }{ appDetail.sellerUrl	}
+              <Button size="small" size="small" href={ appDetail.sellerUrl }>
+              { appDetail.sellerName }
+              </Button>
+              <Typography variant="caption" color="textSecondary">
+              { appDetail.primaryGenreName }
               </Typography>
-              { appDetail.primaryGenreId }
+              
             </Grid>
             <Grid item xs={2} md={2} className={classes.contentContainer} align="right">
             { appDetail.contentAdvisoryRating }
@@ -93,24 +110,36 @@ class AppDetails extends Component {
             <Divider />
 
             <Grid item xs={8} md={6} className={classes.contentContainer} >
-            Current Version: { appDetail.version }
+            
             </Grid>
             <Grid item xs={8} md={6} className={classes.contentContainer} align="right">
-              Current Rating:
+            <Typography variant="caption" color="textSecondary">
+            Version: { appDetail.version }
+            </Typography>
+            <Typography variant="caption" color="textSecondary">
+              Current:
               <StarRateIcon className={classes.icons} />{ appDetail.averageUserRatingForCurrentVersion }
               /
               <PermIdentityIcon className={classes.icons} />{ appDetail.userRatingCountForCurrentVersion }
-              <br />
-              Overall Rating:
+            </Typography>
+            <Typography variant="caption" color="textSecondary">
+              Overall:
               <StarRateIcon className={classes.icons} />{ appDetail.averageUserRating }
               /
               <PermIdentityIcon className={classes.icons} />{ appDetail.userRatingCount }
+              </Typography>
             </Grid>
             <Divider />
               <Grid item xs={12} md={12} className={classes.contentContainer} >
-                { screenShotList.map(url =>
-                  <img src={url} alt="Screenshot" /> 
-                  ) }
+                <div className={ classes.screenShotContainer }>
+                  <div className={ classes.screenShotScrollContainer }>
+                { screenShotList && screenShotList.map(url => {
+                  return (
+                    <img src={url} alt="Screenshot" className={ classes.screenShot } /> 
+                  );
+                }) }
+                  </div>
+                </div>
               </Grid>
             <Divider />
             <Grid item xs={8} md={8} className={classes.contentContainer} >
