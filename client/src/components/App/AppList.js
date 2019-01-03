@@ -87,7 +87,7 @@ class AppList extends Component {
                 </CardContent>
               </CardActionArea>
               <CardActions className={classes.cardActions}>
-                <Button size="small" color="primary" variant="outlined">
+                <Button size="small" color="primary" variant="outlined" href={ "/app/" + customer.trackId }>
                   Learn More
                 </Button>
                 <Button size="small" color="secondary" variant="outlined" href={ customer.trackViewUrl }>

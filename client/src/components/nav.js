@@ -19,6 +19,7 @@ import ListItemText from '@material-ui/core/ListItemText';
 import InboxIcon from '@material-ui/icons/MoveToInbox';
 import MailIcon from '@material-ui/icons/Mail';
 
+
 const drawerWidth = 240;
 const styles = theme => ({
   appBar: {
@@ -88,6 +89,10 @@ const styles = theme => ({
   toolbar: theme.mixins.toolbar,
 });
 
+function ListItemLink(props) {
+  return <ListItem button component="a" {...props} />;
+}
+
 class Nav extends Component {
   state = {
     mobileOpen: false,
@@ -138,7 +143,7 @@ class Nav extends Component {
               />
             </div>
           </Toolbar>
-        </AppBar>xxx
+        </AppBar>
         <Drawer
           className={classes.drawer}
           variant="permanent"
@@ -152,21 +157,20 @@ class Nav extends Component {
           <div className={classes.toolbar} />
           <Divider />
           <List>
-            {['Inbox', 'Starred', 'Send email', 'Drafts'].map((text, index) => (
-              <ListItem button key={text}>
-                <ListItemIcon>{index % 2 === 0 ? <InboxIcon /> : <MailIcon />}</ListItemIcon>
-                <ListItemText primary={text} />
-              </ListItem>
-            ))}
+            <ListItemLink href="/">
+              <ListItemIcon><InboxIcon /></ListItemIcon>
+              <ListItemText primary="Home" />
+            </ListItemLink>
           </List>
           <Divider />
           <List>
-            {['All mail', 'Trash', 'Spam'].map((text, index) => (
-              <ListItem button key={text}>
-                <ListItemIcon>{index % 2 === 0 ? <InboxIcon /> : <MailIcon />}</ListItemIcon>
-                <ListItemText primary={text} />
-              </ListItem>
-            ))}
+            <ListItemLink href="/app/123">
+              <ListItemIcon><MailIcon /></ListItemIcon>
+              <ListItemText primary="Details" />
+            </ListItemLink>
+            <ListItemLink href="#simple-list">
+              <ListItemText primary="Spam" />
+            </ListItemLink>
           </List>
         </Drawer>
       </div>

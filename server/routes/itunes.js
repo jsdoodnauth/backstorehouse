@@ -109,6 +109,17 @@ module.exports = server => {
       return next(new errors.InvalidContentError(err));
     } 
   });
+
+    // GET - Single App Summary
+  server.get('/app/:id', async (req, res, next) => {
+    try {
+      const appList = await App.findOne({ trackId: req.params.id});
+      res.send(appList);
+      next();  
+    } catch(err) {
+      return next(new errors.ResourceNotFoundError(`There is no term with the app of ${req.params.id}`));
+    }        
+  });
   server.get('/app/count', async (req, res, next) => {
     try {
       const appList = await App.countDocuments({ });
